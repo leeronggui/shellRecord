@@ -1,0 +1,75 @@
+#coding=utf8
+#参数一：domain
+#参数二：serviceEntityName
+#参数三：tag
+#参数四：配置文件（file map）
+#参数五：flag
+
+import httplib
+import urllib
+import json
+ag = "10.0.1.1"
+port = "2000"
+
+class HttpClient():
+    def get(self, server, port, location, value={}):
+        self.server = server
+        self.port = port
+        self.location = location
+        self.value = value
+        data = urllib.urlencode(self.value)
+        url = self.location + '?' + data
+        try:
+            httpclient = httplib.HTTPConnection(self.server, self.port,timeout=5)
+            httpclient.request('GET', url)
+            response = httpclient.getresponse()
+            print response.read()
+        except Exception as e:
+            print e
+        finally:
+            if httpclient:
+                httpclient.close()
+
+    def post(self, server, port, location, value):
+        self.server = server
+        self.port = port
+        self.location = location
+        self.value = value
+        headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/plain"}
+        params = urllib.urlencode(self.value)
+        print params
+        try:
+            httpclient = httplib.HTTPConnection(self.server, self.port, timeout=5)
+            httpclient.request('POST', self.location, params, headers=headers)
+            response = httpclient.getresponse()
+            print response.status
+            print response.read()
+            print response.reason
+            print response.getheaders()
+        except Exception as e:
+            print e
+        finally:
+            if httpclient:
+                httpclient.close()
+
+
+def getInstanceFromdomain(domain,serviceEntityName=''):
+    value = {}
+    value['domain'] = domain
+    if serviceEntityName: value['serviceEntityName'] = serviceEntityName
+    httpclient = HttpClient()
+    httpclient.get(ag,port,"/serviceinstance/serviceentity/list/get",value)
+
+def setInstancnDownOrUp(domain,serviceEntityName,instance, status):
+    params = {}
+    params['domain'] = domain
+    params['serviceEntityName'] = serviceEntityName
+    params['server'] = instance
+    params['upOrDown'] = status
+    httpclient = HttpClient()
+    httpclient.post(ag, port, "/serviceinstance/serviceentity/server/put", params)
+#httpc = HttpClient()
+#httpc.get('10.0.1.1','2000','/serviceinstance/serviceentity/list/get')
+getInstanceFromdomain('shieldin.56qq.com', 'shield-manager')
+setInstancnDownOrUp('shieldin.56qq.com', 'shield-manager', '10.0.2.7:405', 'up')
+getInstanceFromdomain('shieldin.56qq.com', 'shield-manager')
