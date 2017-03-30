@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# 导入系统函数库,并解决环境变量问题
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+#系统判断，导入系统函数
+if [[ $(grep -q 'Ubuntu' /proc/version) == 0  ]]; then
+	#statements
+	#如果该系统是ubuntu操作系统
+	. /lib/lsb/init-functions
+	function write_log(){
+        if [[ $1 -eq 0 ]];then
+                #action "" /bin/true
+                shift
+                log_success_msg $*
+        else
+                #action "" /bin/false
+                shift
+                log_failure_msg $*
+        fi
+	}
+elif [[ $(grep -q 'Red' /proc/version) == 0 ]]; then
+		#statements
+		#如果该系统是Red hat系列
+		. /etc/init.d/functions
+		# 写日志
+		function write_log(){
+			info="`date "+%Y-%m-%d %T"` \t $2 "
+			echo -e -n "$info"
+			if [[ $1 -eq 0 ]];then
+				action "" /bin/true
+			else
+				action "" /bin/false
+			fi
+fi
+
+
+std_out 1 "This script used for Ubuntu."
